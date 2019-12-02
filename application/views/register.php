@@ -5,19 +5,21 @@
 		<div class="col-lg-4"></div>
 		<div class="col-lg-4">
 			<div class="wrapper">
-				<form method="POST" action="<?= base_url('auth/register'); ?>" class="form-signin">
+				<form method="POST" action="<?= base_url('auth/validate_registration'); ?>" class="form-signin">
 					<h2 class="form-signin-heading">Register</h2>
-					<input type="text" class="form-control" name="username" placeholder="Username" required="required" autocomplete="off" value="<?php echo set_value('username'); ?>">
+					<input type="text" class="form-control" name="username" placeholder="Username" required="required" autocomplete="off" autofocus>
 					<input type="password" class="form-control" name="password" placeholder="Password" required="required" autocomplete="new-password">
 					<input type="password" class="form-control" name="confirm_password" placeholder="Confirm Password" required="required" autocomplete="new-password">
-					<!-- <input type="password" class="form-control" name="admin_password" placeholder="Admin Password" required="required" autocomplete="new-password"> -->
-					<input type="submit" class="btn btn-lg btn-primary btn-block" value="Login" <?= ($status == true) ? 'disabled' : '' ?> >
-					
-					<?php if(validation_errors()): ?>
+					<hr>
+					<input type="password" class="form-control" name="admin_password" placeholder="Admin Password" required="required" autocomplete="new-password">
+					<input type="submit" class="btn btn-lg btn-primary btn-block" value="Login">
+					<br>
+					<?php if($this->session->flashdata('registration_error')): ?>
 						<div class="alert alert-danger" role="alert">
-							<?php echo validation_errors(); ?>
+							<?php echo $this->session->flashdata('registration_error') ?>
 						</div>
 					<?php endif; ?>
+					
 				</form>	
 			</div>
 

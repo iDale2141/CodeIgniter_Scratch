@@ -1,73 +1,88 @@
-<?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+<?php 
 
-class Auth extends CI_Controller {
 
-	public function __construct(){
-		parent::__construct();
-		$this->load->library('session');
-
-		if( $this->session->has_userdata('user_data') ){
-			redirect('/home');
-		}
-
-	}
-
-	public function index()
+	/**
+	 * 
+	 */
+	class Auth extends CI_Controller
 	{
 
-		$this->load->view('layouts/header');
-		$this->load->view('login');
-		$this->load->view('layouts/footer');
-		$this->session->unset_userdata('login_error'); // to avoid showing error when the page is refreshed
-	}
-
-	public function verify(){
-
-		$auth   = $this->load->model('Auth_model');
-		$verify = $this->Auth_model->select($this->input->post());
-
-		if(!$verify){
-			$this->session->set_userdata('login_error', true);
-			redirect('/');
+		public function index(){
+			if($this->session->has_userdata('user') && $this->session->logged_in ){
+				redirect('/home');
+			}
+			$this->load->view('layouts/header');
+			$this->load->view('login');
+			$this->load->view('layouts/footer');
 		}
-		else{
-			$this->session->unset_userdata('login_error');
-			$this->session->set_userdata('user_data', $verify); // userdata stored in session
-			redirect('/home');
-		}
-	}
 
-	public function registration_form($status = false){
+		public function verify(){
+			$username = $this->input->post('username');
+			$password = $this->input->post('password');
 
-		$array = [
-			'status' => $status
-		];
+			$where = array(
+				'username' => $username,
+				'password' => md5($password)
+			);
+			$user = $this->users->get($where, 1);
 
-		$this->load->view('layouts/header');
-		$this->load->view('register', $array);
-		$this->load->view('layouts/footer');
-	}
-
-	public function register(){
-		
-		$this->load->helper(array('form', 'url'));
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('username', 'Username', array('required', 'min_length[5]'));
-		$this->form_validation->set_rules('password', 'Password', array('required', 'min_length[5]'));
-		$this->form_validation->set_rules('confirm_password', 'Password Confirm', array('required', 'min_length[5]', 'matches[password]'));
-
-		if ($this->form_validation->run() == FALSE){
-			$this->registration_form();
-		}
-		else{
-			$auth = $this->load->model('Auth_model');
-			$create = $this->Auth_model->create($this->input->post());
-			if($create == true){
+			if($user){
+				$this->session->set_userdata('user', $user);
+				$this->session->set_userdata('logged_in', TRUE);
+				redirect('/home');
+			}
+			else{
+				$this->session->set_flashdata('login_error', 'Invalid credentials');
 				redirect('/');
 			}
 		}
 
+		public function register(){
+			$this->load->view('layouts/header');
+			$this->load->view('register');
+			$this->load->view('layouts/footer');
+		}
+
+		public function validate_registration(){
+			
+			$this->form_validation->set_rules('username', 'Username', 'min_length[4]|is_unique[users.username]');
+			$this->form_validation->set_rules('password', 'Password', 'min_length[4]');
+			$this->form_validation->set_rules('confirm_password', 'Password Confirmation', 'matches[password]');
+
+			if($this->form_validation->run() == FALSE){
+				$this->session->set_flashdata('registration_error', validation_errors());
+				redirect('/register');
+			}
+			else{
+				$admin_password = md5($this->input->post('admin_password'));
+				$where = [
+					'password' => $admin_password,
+					'user_role' => 'developer'
+				];
+				$admin = $this->users->get($where, 1);
+				
+				if($admin){
+					$row = array(
+						'username' => $this->input->post('username'),
+						'password' => md5($this->input->post('password')),
+						'user_role' => 'Personnel',
+						'status'   => 'active'
+					);
+					$this->users->insert($row);
+					redirect('/');
+				}
+				else{
+					$this->session->set_flashdata('registration_error', 'Admin Password is incorrect');
+					redirect('/register');
+				}
+			}
+		}	
+		
+		public function logout(){
+			$this->session->sess_destroy();
+			redirect('/');
+		}
+		
 	}
 
-}
+?>

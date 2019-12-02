@@ -8,37 +8,14 @@
 		<div class="col-lg-4">
 			<div class="wrapper">
 				<form method="POST" action="auth/verify/" class="form-signin">
-					<h2 class="form-signin-heading">ACLC | Cashiering</h2>
-					
-					<div class="row">
-						<div class="col-lg-6" style="padding-right:2px !important;">
-							<select name="sy" id="sy" class="form-control">
-								<option value="2016-2017">2016-2017</option>
-								<option value="2017-2018">2017-2018</option>
-								<option value="2018-2019">2018-2019</option>
-								<option value="2019-2020">2019-2020</option>
-								<option value="2020-2021">2020-2021</option>
-								<option value="2021-2022">2021-2022</option>
-								<option value="2022-2023">2022-2023</option>
-								<option value="2023-2024">2023-2024</option>
-							</select>
-						</div>
-
-						<div class="col-lg-6" style="padding-left:2px !important;">
-							<select name="sem" id="sem" class="form-control">
-								<option value="1st">1st</option>
-								<option value="2nd">2nd</option>
-							</select>
-						</div>
-					</div>
-
-					<input type="text" class="form-control" name="username" placeholder="Username" required="required" autocomplete="off">
+					<h3 class="form-signin-heading text-center">Student Information System</h3>
+					<input type="text" class="form-control" name="username" placeholder="Username" required="required" autocomplete="off" autofocus>
 					<input type="password" class="form-control" name="password" placeholder="Password" required="required" autocomplete="new-password">
 					<input type="submit" class="btn btn-lg btn-primary btn-block" value="Login">
-					<?php if(isset($_SESSION['login_error'])): ?>
+					<?php if($this->session->flashdata('login_error')): ?>
 						<br>
 						<div class="alert alert-danger text-center" role="alert">
-							<strong>Error!</strong> Invalid Credentials
+							<strong><?= $this->session->flashdata('login_error') ?></strong>
 						</div>
 					<?php endif; ?>
 				</form>
@@ -102,28 +79,3 @@
 
 
 </style>
-
-<script>
-	
-	$(function(){
-
-		var sy  = "";
-		var sem = "";
-
-		var today = new Date();
-		var mm = String(today.getMonth() + 1).padStart(2, '0') - 1; //January is 0!
-		var y  = today.getFullYear();
-
-		sy = y + "-" + (y+1);	
-
-		if( mm <= 7 ){
-			sem = "2nd";
-		}
-		else{
-			sem = "1st";
-		}
-		$("#sy option[value="+sy+"]").attr('selected', 'selected');
-		$("#sem option[value="+sem+"]").attr('selected', 'selected');
-	})
-
-</script>
